@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Poster Page</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <a href="index.html" class="home-button">&#8592;</a>
+
+    <div class="center-container">
+        <h1>Poster Aanmaken</h1>
+        <p>Maak hier een nieuwe poster aan.</p>
+
+        <form>
+            <select name="eventId" class="dropdown-style">
+                <option hidden>Kies Evenement</option>
+            </select>
+            <!--<input type="file" class="input-style" accept="image/*,.pdf">-->
+            <input name="posterImagePath" type="text" class="input-style" placeholder="Image Path Hier">
+            <button type="submit" class="save-button-style">Poster Opslaan</a>
+        </form>
+
+    </div>
+
+    <img src="Images/Logo-ZUYD-Data-Intelligence.svg" alt="Zuyd Data Intelligence" class="bottom-left-image">
+
+    <script>
+        //Get Events from database and show in dropdown menu.
+        // fetch("https://localhost:7054/api/Event")
+        //     .then(res => {
+        //         return res.json();
+        //     })
+        //     .then(data => {
+        //         data.forEach(event => {
+        //             const markup = `<option>${event.eventTitle}</option>`;
+
+        //             document.querySelector("select").insertAdjacentHTML("beforeend", markup);
+        //         });
+        //     })
+        //     .catch(error => console.log(error));
+
+        fetch('https://localhost:7054/api/Event')
+            .then(response => response.json())
+            .then(events => {
+                const selectElement = document.querySelector('select[name="eventId"]');
+                events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.id; // Set the option value to eventId
+                    option.textContent = event.title; // Display eventTitle
+                    selectElement.appendChild(option);
+                });
+            })
+            .catch(error => console.log(error));
+
+
+
+        //Post data to database.
+        const formEl = document.querySelector("form");
+
+        formEl.addEventListener("submit", event => {
+            event.preventDefault();
+
+            const formData = new FormData(formEl);
+            const data = Object.fromEntries(formData);
+
+            fetch("https://localhost:7054/api/Poster", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.log(error));
+        });
+    </script>
+
+</body>
+
+</html>

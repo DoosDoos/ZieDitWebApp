@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Event Page</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <a href="index.html" class="home-button">&#8592;</a>
+    <div class="center-container">
+        <h1>Evenement Aanmaken</h1>
+        <p>Maak hier een nieuw evenement aan.</p>
+
+        <form>
+            <input name="eventTitle" type="text" class="input-style" placeholder="Evenement Naam">
+            <input name="eventDescription" type="text" class="input-style" placeholder="Evenement Beschrijving">
+            <input name="eventDate" type="datetime-local" class="datetime-style">
+
+            <button type="submit" class="save-button-style">Evenement Opslaan</a>
+        </form>
+
+    </div>
+    <img src="Images/Logo-ZUYD-Data-Intelligence.svg" alt="Zuyd Data Intelligence" class="bottom-left-image">
+
+    <script>
+        //Post data from form to the database.
+        const formEl = document.querySelector("form");
+
+        formEl.addEventListener("submit", event => {
+            event.preventDefault();
+
+            const formData = new FormData(formEl);
+            const data = Object.fromEntries(formData);
+
+            fetch("https://localhost:7054/api/Event", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    window.location.href = "index.html";
+                })
+                .catch(error => console.log(error));
+        });
+    </script>
+
+</body>
+
+</html>

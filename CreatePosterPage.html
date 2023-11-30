@@ -41,6 +41,8 @@
         //     })
         //     .catch(error => console.log(error));
 
+        //ChatGPT manier van het eventId koppelen aan de eventTitle in de dropdown.
+        //Dus hij geeft hier de option (wat in de dropdown staat) de value eventId en laat vervolgens eventTitle zien.
         fetch('https://localhost:7054/api/Event')
             .then(response => response.json())
             .then(events => {
@@ -54,8 +56,6 @@
             })
             .catch(error => console.log(error));
 
-
-
         //Post data to database.
         const formEl = document.querySelector("form");
 
@@ -63,18 +63,29 @@
             event.preventDefault();
 
             const formData = new FormData(formEl);
-            const data = Object.fromEntries(formData);
+            let data = Object.fromEntries(formData);
 
-            fetch("https://localhost:7054/api/Poster", {
+            // Convert eventId to integer if it exists in the form data
+            if (data.eventId) {
+                data.eventId = parseInt(data.eventId, 10);
+            }
+
+            console.log(data)
+
+            fetch("https://localhost:7054/api/Poster?eventId=" + data.eventId.toString(), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(data)
             }).then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log(data);
+                    window.location.href = "index.html";
+                })
                 .catch(error => console.log(error));
         });
+
     </script>
 
 </body>

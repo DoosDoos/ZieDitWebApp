@@ -15,12 +15,12 @@
         <p>Koppel hier een presentator aan een poster.</p>
 
         <form>
-            <select class="dropdown-style">
+            <select name="posterId" class="dropdown-style">
                 <option hidden>Kies Poster</option>
             </select>
-            <input type="text" class="input-style" placeholder="Voornaam">
-            <input type="text" class="input-style" placeholder="Achternaam">
-            <input type="text" class="input-style" placeholder="E-mail Adres">
+            <input name="presenterFirstName" type="text" class="input-style" placeholder="Voornaam">
+            <input name="presenterLastName" type="text" class="input-style" placeholder="Achternaam">
+            <input name="presenterEmail" type="text" class="input-style" placeholder="E-mail Adres">
 
             <button type="submit" class="save-button-style">Presentator Koppelen</a>
         </form>
@@ -30,15 +30,28 @@
 
     <script>
         //Get Posters from database and show in dropdown menu.
-        fetch("https://localhost:7054/api/Poster")
-            .then(res => {
-                return res.json();
-            })
-            .then(data => {
-                data.forEach(poster => {
-                    const markup = `<option>${poster.posterImagePath}</option>`;
+        // fetch("https://localhost:7054/api/Poster")
+        //     .then(res => {
+        //         return res.json();
+        //     })
+        //     .then(data => {
+        //         data.forEach(poster => {
+        //             const markup = `<option>${poster.posterImagePath}</option>`;
 
-                    document.querySelector("select").insertAdjacentHTML("beforeend", markup);
+        //             document.querySelector("select").insertAdjacentHTML("beforeend", markup);
+        //         });
+        //     })
+        //     .catch(error => console.log(error));
+
+        fetch('https://localhost:7054/api/Poster')
+            .then(response => response.json())
+            .then(posters => {
+                const selectElement = document.querySelector('select[name="posterId"]');
+                posters.forEach(poster => {
+                    const option = document.createElement('option');
+                    option.value = poster.id;
+                    option.textContent = poster.imagepath;
+                    selectElement.appendChild(option);
                 });
             })
             .catch(error => console.log(error));
@@ -46,20 +59,30 @@
         //Post data to database.
         const formEl = document.querySelector("form");
 
-        formEl.addEventListener("submit", event => {
-            event.preventDefault();
+        formEl.addEventListener("submit", poster => {
+            poster.preventDefault();
 
             const formData = new FormData(formEl);
-            const data = Object.fromEntries(formData);
+            let data = Object.fromEntries(formData);
 
-            fetch("https://localhost:7054/api/Presenter", {
+            // Convert eventId to integer if it exists in the form data
+            if (data.posterId) {
+                data.posterId = parseInt(data.posterId, 10);
+            }
+
+            console.log(data)
+
+            fetch("https://localhost:7054/api/Presenter?posterId=" + data.posterId.toString(), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(data)
             }).then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log(data);
+                    window.location.href = "index.html";
+                })
                 .catch(error => console.log(error));
         });
     </script>

@@ -2,6 +2,10 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+hr {
+    margin: 20px;
+}
+
 .center-container {
     display: flex; 
     flex-direction: column; 
@@ -110,5 +114,5 @@ body {
     border-radius: 10px;
     font-size: 16px;
     margin-top: 10px;
-    width: 290px;
+    width: 292px;
 }

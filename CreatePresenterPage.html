@@ -21,7 +21,7 @@
             <input name="presenterFirstName" type="text" class="input-style" placeholder="Voornaam">
             <input name="presenterLastName" type="text" class="input-style" placeholder="Achternaam">
             <input name="presenterEmail" type="text" class="input-style" placeholder="E-mail Adres">
-
+            <hr>
             <button type="submit" class="save-button-style">Presentator Koppelen</a>
         </form>
     </div>
@@ -29,20 +29,34 @@
     <img src="Images/Logo-ZUYD-Data-Intelligence.svg" alt="Zuyd Data Intelligence" class="bottom-left-image">
 
     <script>
-        //Get Posters from database and show in dropdown menu.
-        // fetch("https://localhost:7054/api/Poster")
-        //     .then(res => {
-        //         return res.json();
-        //     })
-        //     .then(data => {
-        //         data.forEach(poster => {
-        //             const markup = `<option>${poster.posterImagePath}</option>`;
+        //This is the validation function for the <select>. Here it checks for the dropdown and the other <option> field.
+        function validateForm(data) {
+            //Check dropdown selection
+            if (!data.posterId || data.posterId === "defaultOptionValue") {
+                alert("Please select a poster.");
+                return false;
+            }
 
-        //             document.querySelector("select").insertAdjacentHTML("beforeend", markup);
-        //         });
-        //     })
-        //     .catch(error => console.log(error));
+            //Check other required fields
+            for (let key in data) {
+                if (data.hasOwnProperty(key)) {
+                    let value = data[key];
 
+                    // Handle different types of values
+                    if (typeof value === 'string' && value.trim() === '') {
+                        alert(`Please fill out the ${key} field.`);
+                        return false;
+                    } else if (value == null || value === undefined) {
+                        alert(`Please fill out the ${key} field.`);
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        //Get the posters from the database through API and put them in <select>.
         fetch('https://localhost:7054/api/Poster')
             .then(response => response.json())
             .then(posters => {
@@ -50,11 +64,12 @@
                 posters.forEach(poster => {
                     const option = document.createElement('option');
                     option.value = poster.id;
-                    option.textContent = poster.imagepath;
+                    option.textContent = poster.posterImagePath;
                     selectElement.appendChild(option);
                 });
             })
             .catch(error => console.log(error));
+
 
         //Post data to database.
         const formEl = document.querySelector("form");
@@ -65,12 +80,15 @@
             const formData = new FormData(formEl);
             let data = Object.fromEntries(formData);
 
-            // Convert eventId to integer if it exists in the form data
+            // Convert posterId to integer if it exists in the form data
             if (data.posterId) {
                 data.posterId = parseInt(data.posterId, 10);
             }
 
-            console.log(data)
+            //Use the validation function to check if fields are filled. If not cancel the function.
+            if (!validateForm(data)) {
+                return; // Stop the function if the form is not valid
+            }
 
             fetch("https://localhost:7054/api/Presenter?posterId=" + data.posterId.toString(), {
                 method: "POST",
@@ -78,9 +96,9 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(data)
-            }).then(response => response.json())
+            }).then(response => response.text())
                 .then(data => {
-                    console.log(data);
+                    alert("Presentator gekoppeld!");
                     window.location.href = "index.html";
                 })
                 .catch(error => console.log(error));

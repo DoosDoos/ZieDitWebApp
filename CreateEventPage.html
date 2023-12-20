@@ -16,7 +16,7 @@
             <input name="eventTitle" type="text" class="input-style" placeholder="Evenement Naam">
             <input name="eventDescription" type="text" class="input-style" placeholder="Evenement Beschrijving">
             <input name="eventDate" type="datetime-local" class="datetime-style">
-
+            <hr>
             <button type="submit" class="save-button-style">Evenement Opslaan</a>
         </form>
 
@@ -24,6 +24,19 @@
     <img src="Images/Logo-ZUYD-Data-Intelligence.svg" alt="Zuyd Data Intelligence" class="bottom-left-image">
 
     <script>
+        //Validation function for the form.
+        function validateForm(formData) {
+            let isValid = true;
+            for (let [key, value] of formData.entries()) {
+                if (value.trim() === '') {
+                    alert(`Please fill out the ${key} field.`);
+                    isValid = false;
+                    break;
+                }
+            }
+            return isValid;
+        }
+
         //Post data from form to the database.
         const formEl = document.querySelector("form");
 
@@ -31,6 +44,12 @@
             event.preventDefault();
 
             const formData = new FormData(formEl);
+
+            //Call the validation function
+            if (!validateForm(formData)) {
+                return; // Stop the function if the form is not valid
+            }
+
             const data = Object.fromEntries(formData);
 
             fetch("https://localhost:7054/api/Event", {
@@ -41,7 +60,7 @@
                 body: JSON.stringify(data)
             }).then(response => response.text())
                 .then(data => {
-                    console.log(data);
+                    alert("Evenement Aangemaakt!");
                     window.location.href = "index.html";
                 })
                 .catch(error => console.log(error));

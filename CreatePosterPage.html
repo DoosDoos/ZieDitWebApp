@@ -15,10 +15,11 @@
 
         <form>
             <select name="eventId" class="dropdown-style">
-                <option hidden>Kies Evenement</option>
+                <option value="" hidden>Kies Evenement</option>
             </select>
             <!--<input type="file" class="input-style" accept="image/*,.pdf">-->
-            <input name="posterImagePath" type="text" class="input-style" placeholder="Image Path Hier">
+            <input name="posterImagePath" type="text" class="input-style" placeholder="Image URL Hier">
+            <hr>
             <button type="submit" class="save-button-style">Poster Opslaan</a>
         </form>
 
@@ -27,19 +28,32 @@
     <img src="Images/Logo-ZUYD-Data-Intelligence.svg" alt="Zuyd Data Intelligence" class="bottom-left-image">
 
     <script>
-        //Get Events from database and show in dropdown menu.
-        // fetch("https://localhost:7054/api/Event")
-        //     .then(res => {
-        //         return res.json();
-        //     })
-        //     .then(data => {
-        //         data.forEach(event => {
-        //             const markup = `<option>${event.eventTitle}</option>`;
+        //This is the validation function for the <select>. Here it checks for the dropdown and the other <option> field.
+        function validateForm(data) {
+            //Check dropdown selection
+            if (!data.eventId || data.eventId === "defaultOptionValue") {
+                alert("Please select an event.");
+                return false;
+            }
 
-        //             document.querySelector("select").insertAdjacentHTML("beforeend", markup);
-        //         });
-        //     })
-        //     .catch(error => console.log(error));
+            //Check other required fields
+            for (let key in data) {
+                if (data.hasOwnProperty(key)) {
+                    let value = data[key];
+
+                    // Handle different types of values
+                    if (typeof value === 'string' && value.trim() === '') {
+                        alert(`Please fill out the ${key} field.`);
+                        return false;
+                    } else if (value == null || value === undefined) {
+                        alert(`Please fill out the ${key} field.`);
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
 
         //ChatGPT manier van het eventId koppelen aan de eventTitle in de dropdown.
         //Dus hij geeft hier de option (wat in de dropdown staat) de value eventId en laat vervolgens eventTitle zien.
@@ -50,11 +64,12 @@
                 events.forEach(event => {
                     const option = document.createElement('option');
                     option.value = event.id; // Set the option value to eventId
-                    option.textContent = event.title; // Display eventTitle
+                    option.textContent = event.eventTitle; // Display eventTitle
                     selectElement.appendChild(option);
                 });
             })
             .catch(error => console.log(error));
+
 
         //Post data to database.
         const formEl = document.querySelector("form");
@@ -65,12 +80,15 @@
             const formData = new FormData(formEl);
             let data = Object.fromEntries(formData);
 
-            // Convert eventId to integer if it exists in the form data
+            //Convert eventId to integer if it exists in the form data
             if (data.eventId) {
                 data.eventId = parseInt(data.eventId, 10);
             }
 
-            console.log(data)
+            //Use the validation function to check if fields are filled. If not cancel the function.
+            if (!validateForm(data)) {
+                return; // Stop the function if the form is not valid
+            }
 
             fetch("https://localhost:7054/api/Poster?eventId=" + data.eventId.toString(), {
                 method: "POST",
@@ -78,9 +96,9 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(data)
-            }).then(response => response.json())
+            }).then(response => response.text())
                 .then(data => {
-                    console.log(data);
+                    alert("Poster aangemaakt!");
                     window.location.href = "index.html";
                 })
                 .catch(error => console.log(error));
